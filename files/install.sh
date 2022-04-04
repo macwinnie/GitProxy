@@ -8,6 +8,8 @@
 ###
 ## prepare GO App
 ###
+go mod tidy
+go mod download
 
 ###
 ## build GO App

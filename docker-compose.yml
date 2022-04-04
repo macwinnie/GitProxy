@@ -15,6 +15,9 @@ services:
       - "8098:80"
     volumes:
       - "./src:/usr/src/gitproxy"
+      # This is go modules cache, without it you will have to
+      # re-download all dependencies after restarting container
+      - "./modules:/go/pkg/mod/cache"
     working_dir: "/usr/src/gitproxy"
     command: "sleep infinity"
 
