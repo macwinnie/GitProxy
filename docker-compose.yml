@@ -1,0 +1,21 @@
+---
+
+version: "3"
+
+services:
+
+  gitproxy:
+    image:          "library/golang:latest"
+    restart:        "unless-stopped"
+    # environment:
+    #   TO: DO
+    expose:
+      - "80"
+    ports:
+      - "8098:80"
+    volumes:
+      - "./src:/usr/src/gitproxy"
+    working_dir: "/usr/src/gitproxy"
+    command: "sleep infinity"
+
+...
