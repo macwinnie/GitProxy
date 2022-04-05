@@ -148,8 +148,7 @@ func handleDelete( w http.ResponseWriter, r *http.Request ) {
 func noPostThrow405( w http.ResponseWriter, r *http.Request ) bool {
     if r.Method != http.MethodPost {
         w.Header().Set( "Allow", http.MethodPost )
-        w.WriteHeader( 405 )
-        w.Write( []byte ( "Method not alowed" ) )
+        http.Error( w, "Method Not Allowed", 405 )
         return true
     }
     return false
