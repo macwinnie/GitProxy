@@ -8,6 +8,7 @@
 ###
 ## prepare GO App
 ###
+go get -u
 go mod tidy
 go mod download
 

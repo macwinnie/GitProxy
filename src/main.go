@@ -4,11 +4,13 @@ import (
     "os"
     "fmt"
     "log"
+    "sort"
+    "strings"
     "net/http"
-    "database/sql"
+    // "database/sql"
     "encoding/json"
     "github.com/joho/godotenv"
-    "github.com/golang-migrate/migrate/v4"
+    // "github.com/golang-migrate/migrate/v4"
 )
 
 type env struct {
@@ -21,18 +23,54 @@ type env struct {
 // within `envs` all actual environmental values used by
 // this app will be stored after call of `loadEnv()`
 var envs = make( map[ string ] string )
-// `envDefinition` is the definition JSON for all
-// environmental variables used by this web app
+// `envDefinition` is the definition JSON for all environmental
+// variables used by this web app – see `README.md` for description
 var envDefinition string = `[
     {
-        "_comment": "Port to start the web server at",
         "env":      "WEB_PORT",
         "default":  "80"
+    },
+    {
+        "env":      "GIT_CACHE_DAYS",
+        "default":  "7"
+    },
+    {
+        "env":       "LDAP_GROUP_BASES",
+        "mandatory": "yes"
+    },
+    {
+        "env":       "LDAP_USER_BASES",
+        "mandatory": "yes"
+    },
+    {
+        "env":       "LDAP_HOST",
+        "mandatory": "yes"
+    },
+    {
+        "env":       "LDAP_DIRECTORY_USER",
+        "mandatory": "yes"
+    },
+    {
+        "env":       "LDAP_DIRECTORY_PASSWORD",
+        "mandatory": "yes"
+    },
+    {
+        "env":       "APP_USERS",
+        "mandatory": "yes"
+    },
+    {
+        "env":       "APP_ADMINS",
+        "mandatory": "yes"
     }
 ]`
+// strings for evaluating environmental variables for true
+var trueEnv = []string{ "true", "yes", "1", "y", "t" }
 
 // initialize environmental variables
 func loadEnv() {
+    // sort trueEnv variable
+    sort.Strings( trueEnv )
+    // initiate .env file
     err := godotenv.Load()
     if err != nil {
         log.Println( "No environmental variables are provided by `.env` file – only working with “real” env vars." )
@@ -43,6 +81,13 @@ func loadEnv() {
     for _, elem := range tmpEnvs {
         value, ok := os.LookupEnv( elem[ "env" ] )
         if ! ok {
+            if mandatory, ok := elem[ "mandatory" ]; ok {
+                target := strings.ToLower( mandatory )
+                i := sort.SearchStrings( trueEnv, target )
+                if i < len( trueEnv ) && trueEnv[ i ] == target {
+                    log.Fatal( fmt.Sprintf( "Environmental variable “%s” is mandatory but currently not defined.", elem[ "env" ] ) )
+                }
+            }
             value = elem[ "default" ]
         }
         envs[ elem[ "env" ] ] = value
