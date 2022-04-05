@@ -1,12 +1,14 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "encoding/json"
-    "github.com/joho/godotenv"
     "os"
     "fmt"
+    "log"
+    "net/http"
+    "database/sql"
+    "encoding/json"
+    "github.com/joho/godotenv"
+    "github.com/golang-migrate/migrate/v4"
 )
 
 type env struct {
@@ -29,11 +31,6 @@ var envDefinition string = `[
     }
 ]`
 
-// home handler function that returns HTTP resonse
-func home( w http.ResponseWriter, r *http.Request ) {
-    w.Write( []byte ( "Hello from Sandbox" ) )
-}
-
 // initialize environmental variables
 func loadEnv() {
     err := godotenv.Load()
@@ -52,13 +49,79 @@ func loadEnv() {
     }
 }
 
+// home handler function that returns HTTP resonse
+func handleHome( w http.ResponseWriter, r *http.Request ) {
+    if r.URL.Path != "/" {
+        http.NotFound( w, r )
+        return
+    }
+    w.Write( []byte ( "Login or Dashboard redirect" ) )
+}
+
+// handler function for web app route
+func handleDashboard( w http.ResponseWriter, r *http.Request ) {
+    w.Write( []byte ( "Show dashboard with list of repos and creation panel" ) )
+}
+
+// handler function for web app route
+func handleView( w http.ResponseWriter, r *http.Request ) {
+    w.Write( []byte ( "Show specific git repo" ) )
+}
+
+// handler function for web app route
+func handleCreate( w http.ResponseWriter, r *http.Request ) {
+    if ! noPostThrow405( w, r ) {
+        w.Write( []byte ( "Login or Dashboard redirect" ) )
+    }
+}
+
+// handler function for web app route
+func handleGit( w http.ResponseWriter, r *http.Request ) {
+    if ! noPostThrow405( w, r ) {
+        if r.URL.Path == "/git/pull" {
+            w.Write( []byte ( "Pull from Git origin, create ZIP or TAR or TGZ archive and provide it." ) )
+        } else if r.URL.Path == "/git/push" {
+            w.Write( []byte ( "Uploading / diffing (1st step) or pushing (2nd step) git" ) )
+        } else {
+            http.NotFound( w, r )
+            return
+        }
+    }
+}
+
+// handler function for web app route
+func handleDelete( w http.ResponseWriter, r *http.Request ) {
+    if r.Method != http.MethodPost {
+        // produce page to confirm deletion
+        w.Write( []byte ( "Confirmation page for deletion" ) )
+    } else {
+        w.Write( []byte ( "Deletion of Git project" ) )
+    }
+}
+
+// handler function for web app route
+func noPostThrow405( w http.ResponseWriter, r *http.Request ) bool {
+    if r.Method != http.MethodPost {
+        w.Header().Set( "Allow", http.MethodPost )
+        w.WriteHeader( 405 )
+        w.Write( []byte ( "Method not alowed" ) )
+        return true
+    }
+    return false
+}
+
 // function starting the webserver
 func prepareRoutes() *http.ServeMux {
     // initialize new servemux (router)
     mux := http.NewServeMux()
-    // register home function as handler for `/` URL pattern
-    // `/` is catchy, so it'll catch ALL requests
-    mux.HandleFunc( "/", home )
+    // register fixed paths for web app
+    mux.HandleFunc( "/create", handleCreate )
+    mux.HandleFunc( "/dashboard", handleDashboard )
+    // register subtree paths for web app
+    mux.HandleFunc( "/", handleHome )
+    mux.HandleFunc( "/git/", handleGit )
+    mux.HandleFunc( "/view/", handleView )
+    mux.HandleFunc( "/delete/", handleDelete )
 
     return mux
 }
@@ -70,7 +133,6 @@ func main() {
     mux := prepareRoutes()
 
     // log message what is going on: starting webserver
-    // webPort := fmt.Sprintf( ":%s", envs[ "WEB_PORT" ] )
     webPort := fmt.Sprint( ":", envs[ "WEB_PORT" ] )
     log.Printf( "Starting webserver on %s\n", webPort )
     // start Webserver and register non-nil-errors

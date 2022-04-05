@@ -13,7 +13,8 @@ For production, you should use `macwinnie/gitproxy:latest` image.
 ## Environmental variables
 
 | env                   | default               | change recommended | description |
-| --------------------- | --------------------- |:------------------:| ----------- | `WEB_PORT`            | `80`                  | no                 | On which port should the webserver within the container be listening? For port-binding, it is recommended to change the port not within the container. |
+| --------------------- | --------------------- |:------------------:| ----------- |
+| `WEB_PORT`            | `80`                  | no                 | On which port should the webserver within the container be listening? For port-binding, it is recommended to change the port not within the container. |
 
 ## Licence
 
