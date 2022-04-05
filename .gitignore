@@ -1,3 +1,5 @@
 .DS_*
 modules/*
 !modules/.gitkeep
+.env*
+!.env.example

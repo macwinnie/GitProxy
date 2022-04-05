@@ -10,6 +10,11 @@ For development, the `docker-compose.yml` provides a Go-environment to work with
 
 For production, you should use `macwinnie/gitproxy:latest` image.
 
+## Environmental variables
+
+| env                   | default               | change recommended | description |
+| --------------------- | --------------------- |:------------------:| ----------- | `WEB_PORT`            | `80`                  | no                 | On which port should the webserver within the container be listening? For port-binding, it is recommended to change the port not within the container. |
+
 ## Licence
 
 This project is published unter [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license.
